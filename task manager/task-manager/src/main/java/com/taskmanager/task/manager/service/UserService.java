@@ -337,26 +337,6 @@ public class UserService implements UserDetailsService {
     }
 
 
-//    @Transactional
-//    public void deleteById(String id) {
-//        Optional<User> userOptional = userRepository.findById(id);
-//        if (userOptional.isEmpty()) {
-//            throw new CustomException(HttpStatus.NOT_FOUND.value(), Messages.USER_NOT_FOUND, Messages.NOT_FOUND);
-//        }
-//
-//        if(userOptional.get().getRole().getRole().equals("admin")){
-//            throw new CustomException(HttpStatus.FORBIDDEN.value(),Messages.FORBIDDEN_MESSAGE,Messages.FORBIDDEN);
-//        }
-//
-//        String userId= jwtTokenProvider.getUserId(jwtAuthenticationFilter.getToken());
-//        userOptional.get().setDeleted(true);
-//        userOptional.get().setStatus(Messages.status_Inactive);
-//        userOptional.get().setUpdatedAt(new Date());
-//
-//        userRepository.save(userOptional.get());
-//    }
-
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAddress(email);
