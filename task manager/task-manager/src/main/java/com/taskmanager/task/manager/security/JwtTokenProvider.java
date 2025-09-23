@@ -62,6 +62,22 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS512, AppConfig.JWT_SECRET)
                 .compact();
     }
+    public String createRefreshToken(String userId) {
+        String userID=userService.findByUserIdToken(userId).getId();
+        Claims claims = Jwts.claims().setSubject(userID);
+        claims.put("role", userService.getUserById(userId).get().getRole());
+        claims.put("username", userService.getUserById(userId).get().getUsername());
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + AppConfig.JWT_REFRESH_EXPIRATION);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS512, AppConfig.JWT_SECRET)
+                .compact();
+    }
 
     public boolean validateToken(String token) {
         try {
