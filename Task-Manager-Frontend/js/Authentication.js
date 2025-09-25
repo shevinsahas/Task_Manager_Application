@@ -1,3 +1,75 @@
+function LogUser() {
+    var username = $('#username').val();
+    var password = $('#password').val();
+
+    var loginData = JSON.stringify({
+        emailAddress: username,
+        password: password
+    });
+
+    $.ajax({
+        url: "http://localhost:8080/api/auth/login",
+        type: 'POST',
+        data: loginData,
+        contentType: 'application/json',
+        success: function(response, status, xhr) {
+            var token = xhr.getResponseHeader('Authorization')?.split(' ')[1];
+            
+            if (token) {
+                localStorage.setItem('jwtToken', token);
+                localStorage.setItem('username', response.username);
+            }
+
+            if (response.role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        },
+        error: function(xhr, status, error) {
+            var errorMessage = xhr.responseJSON && xhr.responseJSON.message 
+                ? xhr.responseJSON.message 
+                : "Login failed. Please try again.";
+            swal({
+                text: errorMessage,
+                icon: "warning",
+                button: "OK"
+            });
+        }
+    });
+}
+
+
+
+
+function resetForm() {
+document.getElementById('username').value = "";
+document.getElementById("fname").value = "";
+document.getElementById("lname").value = "";
+document.getElementById("email").value = "";
+document.getElementById("contact").value = "";
+document.getElementById("pass").value = "";
+document.getElementById("con").value = "";
+}
+
+
+function resetFormLogin() {
+document.getElementById("username").value = "";
+document.getElementById("password").value = "";
+}
+
+
+ document.getElementById('registrationForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const form = this;
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    registerUser();
+});
 
 function registerUser() {
     const fname = document.getElementById('fname').value;
