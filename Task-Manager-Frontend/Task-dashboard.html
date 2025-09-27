@@ -204,15 +204,7 @@
       const cls = map[s] || 'light';
       return '<span class="badge badge-' + cls + '">' + (s || '') + '</span>';
     }
-    function badgeForPriority(p) {
-      const map = {
-        'LOW': 'success',
-        'MEDIUM': 'warning',
-        'HIGH': 'danger'
-      };
-      const cls = map[p] || 'light';
-      return '<span class="badge badge-' + cls + '">' + (p || '') + '</span>';
-    }
+
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
     function formatDate(iso) {
       try { const d = new Date(iso); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); } catch { return iso; }
