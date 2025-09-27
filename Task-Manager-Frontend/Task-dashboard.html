@@ -10,12 +10,10 @@
 
   <title>Task Flow - Dashboard</title>
 
-
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
-  <!-- SweetAlert -->
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
   <style>
@@ -35,6 +33,7 @@
     <div id="content-wrapper" class="d-flex flex-column">
       <div id="content">
 
+        <!-- Topbar -->
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
           <h5 class="mb-0 font-weight-bold text-gray-800">Task Dashboard</h5>
           <ul class="navbar-nav ml-auto">
@@ -90,7 +89,6 @@
 
       </div>
 
-
       <footer class="sticky-footer bg-white">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
@@ -100,8 +98,131 @@
       </footer>
 
     </div>
+
   </div>
 
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Edit Task</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="editForm">
+          <div class="modal-body">
+            <input type="hidden" id="edit-id">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="edit-title">Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit-title" required>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="edit-status">Status</label>
+                <select id="edit-status" class="form-control">
+                  <option value="TODO">TODO</option>
+                  <option value="IN_PROGRESS">IN_PROGRESS</option>
+                  <option value="DONE">DONE</option>
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="edit-priority">Priority</label>
+                <select id="edit-priority" class="form-control">
+                  <option value="LOW">LOW</option>
+                  <option value="MEDIUM" selected>MEDIUM</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="edit-dueDate">Due date</label>
+                <input type="date" class="form-control" id="edit-dueDate">
+              </div>
+              <div class="form-group col-md-4">
+                <label>Created</label>
+                <input type="text" class="form-control" id="edit-createdAt" disabled>
+              </div>
+              <div class="form-group col-md-4">
+                <label>Updated</label>
+                <input type="text" class="form-control" id="edit-updatedAt" disabled>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="edit-description">Description</label>
+              <textarea id="edit-description" class="form-control" rows="4" placeholder="Optional details"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createModalLabel">Add New Task</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="createForm">
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="create-title">Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="create-title" required>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="create-status">Status</label>
+                <select id="create-status" class="form-control">
+                  <option value="TODO" selected>TODO</option>
+                  <option value="IN_PROGRESS">IN_PROGRESS</option>
+                  <option value="DONE">DONE</option>
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="create-priority">Priority</label>
+                <select id="create-priority" class="form-control">
+                  <option value="LOW">LOW</option>
+                  <option value="MEDIUM" selected>MEDIUM</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="create-dueDate">Due date</label>
+                <input type="date" class="form-control" id="create-dueDate">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="create-description">Description</label>
+              <textarea id="create-description" class="form-control" rows="4" placeholder="Optional details"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spinner Overlay -->
+  <div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="vendor/jquery/jquery.min.js"></script>
@@ -109,11 +230,10 @@
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
   <script>
-    const API_BASE = 'http://localhost:8080/api/tasks';
+    const API_BASE = 'http://localhost:8080/api/tasks'; 
 
     $(document).ready(function () {
       $('#btnRefresh').on('click', loadTasks);
-      $('#searchInput').on('input', filterRows);
       $('#editForm').on('submit', onSaveEdit);
       $('#btnAdd').on('click', function(){ $('#createModal').modal('show'); });
       $('#createForm').on('submit', onSaveCreate);
@@ -176,10 +296,144 @@
         $tbody.append($tr);
       });
 
-      filterRows();
     }
 
+
+    function openEditModal(payload) {
+      const id = payload.id;
+      if (!id) return;
+      showSpinner(true);
+      $.ajax({
+        url: API_BASE + '/' + id,
+        method: 'GET',
+        headers: getAuthHeaders(),
+        success: function (t) {
+          $('#edit-id').val(t.id);
+          $('#edit-title').val(t.title || '');
+          $('#edit-description').val(t.description || '');
+          $('#edit-status').val(t.status || 'TODO');
+          $('#edit-priority').val(t.priority || 'MEDIUM');
+          $('#edit-dueDate').val(t.dueDate ? (t.dueDate.substr(0,10)) : '');
+          $('#edit-createdAt').val(t.createdAt ? formatDateTime(t.createdAt) : '');
+          $('#edit-updatedAt').val(t.updatedAt ? formatDateTime(t.updatedAt) : '');
+          $('#editModal').modal('show');
+        },
+        error: handleAjaxError,
+        complete: function () { showSpinner(false); }
+      });
+    }
+
+    function onSaveEdit(e) {
+        e.preventDefault();
+        const id = $('#edit-id').val();
+        const body = {
+        title: ($('#edit-title').val() || '').trim(),
+        description: $('#edit-description').val() || '',
+        status: $('#edit-status').val() || 'TODO',
+        priority: $('#edit-priority').val() || 'MEDIUM',
+        dueDate: $('#edit-dueDate').val() || null
+        };
+
+
+        if (!body.title) {
+        swal({ text: 'Title is required', icon: 'warning', button: 'OK' });
+        return;
+    }
+
+
+    function resetCreateForm(){
+        $('#create-title').val('');
+        $('#create-description').val('');
+        $('#create-status').val('TODO');
+        $('#create-priority').val('MEDIUM');
+        $('#create-dueDate').val('');
+    }
+
+
+    showSpinner(true);
+    $.ajax({
+        url: API_BASE + '/' + id,
+        method: 'PUT',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, getAuthHeaders()),
+        data: JSON.stringify(body),
+        success: function () {
+    $('#editModal').modal('hide');
+        swal({ text: 'Task updated', icon: 'success', button: 'OK' });
+        loadTasks();
+    },
+        error: handleAjaxError,
+        complete: function () { showSpinner(false); }
+    });
+    }
+
+
+    // === Create Task (global) ===
+    function onSaveCreate(e) {
+        e.preventDefault();
+        const body = {
+        title: ($('#create-title').val() || '').trim(),
+        description: $('#create-description').val() || '',
+        status: $('#create-status').val() || 'TODO',
+        priority: $('#create-priority').val() || 'MEDIUM',
+        dueDate: $('#create-dueDate').val() || null
+    };
+    if (!body.title) {
+        swal({ text: 'Title is required', icon: 'warning', button: 'OK' });
+        return;
+    }
+        showSpinner(true);
+        $.ajax({
+            url: API_BASE,
+            method: 'POST',
+            headers: Object.assign({ 'Content-Type': 'application/json' }, getAuthHeaders()),
+            data: JSON.stringify(body),
+            success: function () {
+    $('#createModal').modal('hide');
+        swal({ text: 'Task created', icon: 'success', button: 'OK' });
+        loadTasks();
+    },
+        error: handleAjaxError,
+        complete: function () { showSpinner(false); }
+    });
+    }
+
+
+    function resetCreateForm(){
+        $('#create-title').val('');
+        $('#create-description').val('');
+        $('#create-status').val('TODO');
+        $('#create-priority').val('MEDIUM');
+        $('#create-dueDate').val('');
+    }
     
+    function confirmDelete(payload) {
+      const id = payload.id; const title = payload.title || 'this task';
+      swal({
+        title: 'Delete task?',
+        text: 'Are you sure you want to delete "' + title + '"? This action cannot be undone.',
+        icon: 'warning',
+        buttons: [true, 'Delete'],
+        dangerMode: true,
+      }).then((willDelete) => {
+        if (willDelete) doDelete(id);
+      });
+    }
+
+    function doDelete(id) {
+      if (!id) return;
+      showSpinner(true);
+      $.ajax({
+        url: API_BASE + '/' + id,
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        success: function () {
+          swal({ text: 'Task deleted', icon: 'success', button: 'OK' });
+          loadTasks();
+        },
+        error: handleAjaxError,
+        complete: function () { showSpinner(false); }
+      });
+    }
 
     function handleAjaxError(xhr) {
       if (xhr && xhr.status === 401) {
@@ -195,7 +449,7 @@
       }
     }
 
-
+    // UI helpers
     function badgeForStatus(s) {
       const map = {
         'TODO': 'secondary',
@@ -205,8 +459,15 @@
       const cls = map[s] || 'light';
       return '<span class="badge badge-' + cls + '">' + (s || '') + '</span>';
     }
-
-
+    function badgeForPriority(p) {
+      const map = {
+        'LOW': 'success',
+        'MEDIUM': 'warning',
+        'HIGH': 'danger'
+      };
+      const cls = map[p] || 'light';
+      return '<span class="badge badge-' + cls + '">' + (p || '') + '</span>';
+    }
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
     function formatDate(iso) {
       try { const d = new Date(iso); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); } catch { return iso; }
