@@ -3,6 +3,7 @@ package com.taskmanager.task.manager.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskmanager.task.manager.ResponseHandler.CustomException;
 import com.taskmanager.task.manager.ResponseHandler.ErrorResponse;
+import com.taskmanager.task.manager.dto.UserDTO;
 import com.taskmanager.task.manager.model.Session;
 import com.taskmanager.task.manager.model.User;
 import com.taskmanager.task.manager.service.UserService;
@@ -16,12 +17,15 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter implements Filter {
@@ -54,9 +58,6 @@ public class JwtAuthenticationFilter implements Filter {
             String requestURI = request.getRequestURI();
             if(requestURI.startsWith("/uploads/")
                     || "/api/statistic".equals(requestURI)
-                    || requestURI.startsWith("/api/menu-items")
-                    || requestURI.startsWith("/api/cart")
-                    || requestURI.startsWith("/api/admin/curries")
                     || requestURI.startsWith("/api/auth/")
                     || "/api/statistic/chart".equals(requestURI)
                     || requestURI.startsWith("/api/auth/login/")) {
@@ -78,8 +79,7 @@ public class JwtAuthenticationFilter implements Filter {
             String role = userDetails.get().getRole();
             String httpMethod = request.getMethod();
 
-            if (requestURI.startsWith("/api/auth/createUser")
-                    || requestURI.startsWith("/api/team")
+            if (requestURI.startsWith("/api/auth")
                     || requestURI.startsWith("/api/client")
                     || requestURI.startsWith("/api/projects")
             ) {
@@ -89,9 +89,21 @@ public class JwtAuthenticationFilter implements Filter {
                 }
             }
 
-            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            var userOpt = userService.getUserById(userId);
+            if (userOpt.isEmpty()) {
+                throw new CustomException(HttpStatus.UNAUTHORIZED.value(), Messages.YOU_ARE_NOT_AUTHORIZED, Messages.UNAUTHORIZED);
+            }
+            UserDTO user = userOpt.get();
+
+// Map to Spring authorities
+            List<GrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + user.getRole().toString().toUpperCase()) // e.g. ROLE_ADMIN
+            );
+
+// IMPORTANT: use 3-arg ctor → authenticated token
+            var auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             String newToken = jwtTokenProvider.createRefreshToken(userId);
             response.setHeader("Authorization", "Bearer " + newToken);
