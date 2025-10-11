@@ -7,6 +7,7 @@ import com.taskmanager.task.manager.model.User;
 import com.taskmanager.task.manager.service.UserService;
 import com.taskmanager.task.manager.util.Messages;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,5 +44,21 @@ public class AuthController {
         return ResponseEntity.ok(User.convertToDTO(user));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        // Invalidate HTTP session and clear SecurityContext
+        var session = request.getSession(false);
+        if (session != null) session.invalidate();
+
+        // Delete JSESSIONID cookie
+        var cookie = new jakarta.servlet.http.Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        return ResponseEntity.noContent().build();
+    }
 
 }
