@@ -13,6 +13,7 @@ public record TaskResponse(
         Task.Status status,
         Task.Priority priority,
         LocalDate dueDate,
+        String note,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {}

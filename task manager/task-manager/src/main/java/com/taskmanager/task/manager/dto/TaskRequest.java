@@ -10,5 +10,6 @@ public record TaskRequest(
         @Size(max = 4000) String description,
         @NotNull Task.Status status,
         @NotNull Task.Priority priority,
-        LocalDate dueDate
+        LocalDate dueDate,
+        @Size(max = 1000) String note
 ) {}

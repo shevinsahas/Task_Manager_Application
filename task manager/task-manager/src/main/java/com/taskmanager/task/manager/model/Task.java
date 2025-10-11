@@ -41,6 +41,10 @@ public class Task {
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(length = 1000)
+    private String note;
+
+
     @PrePersist
     void onCreate() {
         var now = OffsetDateTime.now();
