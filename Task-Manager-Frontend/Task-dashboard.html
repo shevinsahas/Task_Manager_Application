@@ -1,481 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Task Manager Dashboard (View, Edit, Delete)">
-  <meta name="author" content="TaskFlow">
-
   <title>Task Flow - Dashboard</title>
 
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
-
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
   <style>
-    body {
-      background-color: #f3f6fb;
-      font-family: 'Nunito', sans-serif;
-    }
-    .table td, .table th { vertical-align: middle; }
-    .badge { font-size: .75rem; }
-    .spinner-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.25); z-index: 1055; }
+    body{background:#f3f6fb;font-family:'Nunito',sans-serif}
+    .table td,.table th{vertical-align:middle}
+    .badge{font-size:.75rem}
+    .spinner-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.25);z-index:1055}
+    .chip-group .btn{margin-right:.25rem}
+    .truncate-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   </style>
 </head>
-
 <body id="page-top">
+<div id="wrapper">
+  <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content">
+      <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <h5 class="mb-0 font-weight-bold text-gray-800">Task Dashboard</h5>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item mr-2">
+            <button id="btnClearCompleted" class="btn btn-sm btn-outline-danger">
+              <i class="fas fa-broom mr-1"></i>Clear Completed
+            </button>
+          </li>
+          <li class="nav-item mr-2">
+            <button id="btnAdd" class="btn btn-sm btn-primary"><i class="fas fa-plus mr-1"></i>Add Task</button>
+          </li>
+          <li class="nav-item mr-2">
+            <button id="btnRefresh" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+          </li>
+          <li class="nav-item">
+            <button id="btnLogout" class="btn btn-sm btn-outline-secondary"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+          </li>
+        </ul>
+      </nav>
 
-  <div id="wrapper">
-    <div id="content-wrapper" class="d-flex flex-column">
-      <div id="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card shadow mb-4">
+              <div class="card-header py-3 d-flex align-items-center flex-wrap w-100">
+                <h6 class="m-0 font-weight-bold text-primary">Tasks</h6>
 
-        <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-          <h5 class="mb-0 font-weight-bold text-gray-800">Task Dashboard</h5>
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item mr-2">
-              <button id="btnAdd" class="btn btn-sm btn-primary"><i class="fas fa-plus mr-1"></i>Add Task</button>
-            </li>
-            <li class="nav-item">
-              <button id="btnRefresh" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
-            </li>
-          </ul>
-        </nav>
+                <!-- Filters -->
+                <div class="chip-group ml-3">
+                  <button class="btn btn-sm btn-outline-primary active" data-view="ALL">All</button>
+                  <button class="btn btn-sm btn-outline-primary" data-view="ACTIVE">Active</button>
+                  <button class="btn btn-sm btn-outline-primary" data-view="COMPLETED">Completed</button>
+                </div>
 
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12">
-              <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex align-items-center flex-wrap gap-2">
-                  <h6 class="m-0 font-weight-bold text-primary">Tasks</h6>
-                  <div class="ml-auto d-flex align-items-center">
-                    <div class="input-group input-group-sm">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                      </div>
-                      <input id="searchInput" type="text" class="form-control" placeholder="Search title or description...">
+                <!-- Search -->
+                <div class="ml-auto d-flex align-items-center mt-2 mt-md-0">
+                  <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
                     </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-bordered" id="tasksTable" width="100%" cellspacing="0">
-                      <thead class="thead-light">
-                        <tr>
-                          <th>Title</th>
-                          <th class="d-none d-md-table-cell">Status</th>
-                          <th class="d-none d-md-table-cell">Priority</th>
-                          <th>Due</th>
-                          <th class="d-none d-lg-table-cell">Updated</th>
-                          <th style="width: 120px;">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody id="tasksTbody">
-                        <tr>
-                          <td colspan="6" class="text-center text-muted">Loading…</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <input id="searchInput" type="text" class="form-control" placeholder="Search title, description, note…">
                   </div>
                 </div>
               </div>
+
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered" id="tasksTable" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                    <tr>
+                      <th>Title / Note</th>
+                      <th class="d-none d-md-table-cell">Status</th>
+                      <th class="d-none d-md-table-cell">Priority</th>
+                      <th>Due</th>
+                      <th class="d-none d-lg-table-cell">Updated</th>
+                      <th style="width: 160px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tasksTbody">
+                    <tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav>
+                  <ul id="pager" class="pagination pagination-sm mb-0"></ul>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
-
       </div>
 
-      <footer class="sticky-footer bg-white">
-        <div class="container my-auto">
-          <div class="copyright text-center my-auto">
-            <span>© Task Flow</span>
-          </div>
-        </div>
-      </footer>
-
     </div>
 
-  </div>
-
-  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editModalLabel">Edit Task</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+    <footer class="sticky-footer bg-white">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>© Task Flow</span>
         </div>
-        <form id="editForm">
-          <div class="modal-body">
-            <input type="hidden" id="edit-id">
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="edit-title">Title <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="edit-title" required>
-              </div>
-              <div class="form-group col-md-3">
-                <label for="edit-status">Status</label>
-                <select id="edit-status" class="form-control">
-                  <option value="TODO">TODO</option>
-                  <option value="IN_PROGRESS">IN_PROGRESS</option>
-                  <option value="DONE">DONE</option>
-                </select>
-              </div>
-              <div class="form-group col-md-3">
-                <label for="edit-priority">Priority</label>
-                <select id="edit-priority" class="form-control">
-                  <option value="LOW">LOW</option>
-                  <option value="MEDIUM" selected>MEDIUM</option>
-                  <option value="HIGH">HIGH</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-4">
-                <label for="edit-dueDate">Due date</label>
-                <input type="date" class="form-control" id="edit-dueDate">
-              </div>
-              <div class="form-group col-md-4">
-                <label>Created</label>
-                <input type="text" class="form-control" id="edit-createdAt" disabled>
-              </div>
-              <div class="form-group col-md-4">
-                <label>Updated</label>
-                <input type="text" class="form-control" id="edit-updatedAt" disabled>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="edit-description">Description</label>
-              <textarea id="edit-description" class="form-control" rows="4" placeholder="Optional details"></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save changes</button>
-          </div>
-        </form>
       </div>
-    </div>
+    </footer>
   </div>
+</div>
 
-  <!-- Create Modal -->
-  <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="createModalLabel">Add New Task</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <form id="createForm">
-          <div class="modal-body">
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="create-title">Title <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="create-title" required>
-              </div>
-              <div class="form-group col-md-3">
-                <label for="create-status">Status</label>
-                <select id="create-status" class="form-control">
-                  <option value="TODO" selected>TODO</option>
-                  <option value="IN_PROGRESS">IN_PROGRESS</option>
-                  <option value="DONE">DONE</option>
-                </select>
-              </div>
-              <div class="form-group col-md-3">
-                <label for="create-priority">Priority</label>
-                <select id="create-priority" class="form-control">
-                  <option value="LOW">LOW</option>
-                  <option value="MEDIUM" selected>MEDIUM</option>
-                  <option value="HIGH">HIGH</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-4">
-                <label for="create-dueDate">Due date</label>
-                <input type="date" class="form-control" id="create-dueDate">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="create-description">Description</label>
-              <textarea id="create-description" class="form-control" rows="4" placeholder="Optional details"></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create Task</button>
-          </div>
-        </form>
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Edit Task</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
       </div>
+      <form id="editForm">
+        <div class="modal-body">
+          <input type="hidden" id="edit-id">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="edit-title">Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="edit-title" required>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="edit-status">Status</label>
+              <select id="edit-status" class="form-control">
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="edit-priority">Priority</label>
+              <select id="edit-priority" class="form-control">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="edit-dueDate">Due date</label>
+              <input type="date" class="form-control" id="edit-dueDate">
+            </div>
+            <div class="form-group col-md-4">
+              <label>Created</label>
+              <input type="text" class="form-control" id="edit-createdAt" disabled>
+            </div>
+            <div class="form-group col-md-4">
+              <label>Updated</label>
+              <input type="text" class="form-control" id="edit-updatedAt" disabled>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-description">Description</label>
+            <textarea id="edit-description" class="form-control" rows="3" placeholder="Optional details"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-note">Short Note</label>
+            <textarea id="edit-note" class="form-control" rows="2" placeholder="Quick note for this task"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
-  <!-- Spinner Overlay -->
-  <div class="spinner-overlay" id="spinnerOverlay">
-    <div class="spinner-border text-primary" role="status">
-      <span class="sr-only">Loading...</span>
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createModalLabel">Add New Task</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <form id="createForm">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="create-title">Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="create-title" required>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="create-status">Status</label>
+              <select id="create-status" class="form-control">
+                <option value="TODO" selected>TODO</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="create-priority">Priority</label>
+              <select id="create-priority" class="form-control">
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM" selected>MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="create-dueDate">Due date</label>
+              <input type="date" class="form-control" id="create-dueDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="create-description">Description</label>
+            <textarea id="create-description" class="form-control" rows="3" placeholder="Optional details"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="create-note">Short Note</label>
+            <textarea id="create-note" class="form-control" rows="2" placeholder="Quick note for this task"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Task</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
-  <!-- Scripts -->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>
+</div>
 
-  <script>
-    const API_BASE = 'http://localhost:8080/api/tasks'; 
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    $(document).ready(function () {
-      $('#btnRefresh').on('click', loadTasks);
-      $('#editForm').on('submit', onSaveEdit);
-      $('#btnAdd').on('click', function(){ $('#createModal').modal('show'); });
-      $('#createForm').on('submit', onSaveCreate);
+<script>
+  // === CONFIG ===
+  const API_BASE  = 'http://localhost:8080/api/tasks';     // Spring controller base
+  const AUTH_BASE = 'http://localhost:8080/auth';      // logout endpoint
+
+  // === STATE ===
+  let state = {
+    q: '',
+    view: 'ALL',
+    page: 0,
+    size: 10,
+    sort: 'updatedAt,DESC'
+  };
+
+  $(function () {
+    $('#btnRefresh').on('click', () => loadTasks(true));
+    $('#btnAdd').on('click', () => { resetCreateForm(); $('#createModal').modal('show'); });
+    $('#btnLogout').on('click', logout);
+    $('#btnClearCompleted').on('click', clearCompleted);
+
+    // filter chips
+    $('.chip-group .btn').on('click', function(){
+      $('.chip-group .btn').removeClass('active');
+      $(this).addClass('active');
+      state.view = $(this).data('view');
+      state.page = 0;
       loadTasks();
     });
 
-    function getAuthHeaders() {
-      const token = localStorage.getItem('jwtToken');
-      return token ? { 'Authorization': 'Bearer ' + token } : {};
+    // search (debounced)
+    let timer = null;
+    $('#searchInput').on('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        state.q = ($(this).val() || '').trim();
+        state.page = 0;
+        loadTasks();
+      }, 300);
+    });
+
+    // forms
+    $('#editForm').on('submit', onSaveEdit);
+    $('#createForm').on('submit', onSaveCreate);
+
+    loadTasks(true);
+  });
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem('jwtToken');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+  }
+
+  function showSpinner(show){ $('#spinnerOverlay').css('display', show ? 'flex' : 'none'); }
+
+  function loadTasks(force=false){
+    showSpinner(true);
+    $('#tasksTbody').html('<tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>');
+    const params = $.param({ q: state.q, view: state.view, page: state.page, size: state.size, sort: state.sort });
+    $.ajax({
+      url: API_BASE + '?' + params,
+      method: 'GET',
+      headers: getAuthHeaders(),
+      success: function (page) { renderRows(page); renderPager(page); },
+      error: handleAjaxError,
+      complete: function(){ showSpinner(false); }
+    });
+  }
+
+  function renderRows(page){
+    const rows = (page && page.content) ? page.content : (Array.isArray(page) ? page : []);
+    const $tbody = $('#tasksTbody');
+    $tbody.empty();
+    if (!rows.length){
+      $tbody.append('<tr><td colspan="6" class="text-center text-muted">No tasks found</td></tr>');
+      return;
     }
 
-    function showSpinner(show) {
-      $('#spinnerOverlay').css('display', show ? 'flex' : 'none');
+    rows.forEach(t => {
+      const statusBadge = badgeForStatus(t.status);
+      const priorityBadge = badgeForPriority(t.priority);
+      const due = t.dueDate ? formatDate(t.dueDate) : '—';
+      const updated = t.updatedAt ? formatDateTime(t.updatedAt) : '—';
+
+      const $tr = $('<tr></tr>');
+      const $title = $('<td></td>');
+      $('<div class="font-weight-bold"></div>').text(t.title || '').appendTo($title);
+      if (t.note) $('<div class="small text-primary truncate-2"></div>').text('Note: ' + t.note).appendTo($title);
+      if (t.description) $('<div class="small text-muted truncate-2"></div>').text(t.description).appendTo($title);
+
+      $tr.append($title);
+      $tr.append(`<td class="d-none d-md-table-cell">${statusBadge}</td>`);
+      $tr.append(`<td class="d-none d-md-table-cell">${priorityBadge}</td>`);
+      $tr.append(`<td>${due}</td>`);
+      $tr.append(`<td class="d-none d-lg-table-cell">${updated}</td>`);
+      $tr.append(`
+        <td class="text-right">
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary" onclick='openEditModal(${JSON.stringify({id:t.id}).replace(/"/g,"&quot;")})'><i class="fas fa-pen"></i></button>
+            <button class="btn btn-outline-danger" onclick='confirmDelete(${JSON.stringify({id:t.id,title:t.title}).replace(/"/g,"&quot;")})'><i class="fas fa-trash"></i></button>
+          </div>
+        </td>`);
+      $tbody.append($tr);
+    });
+  }
+
+  function renderPager(page){
+    const $p = $('#pager'); $p.empty();
+    if (!page || page.totalPages <= 1) return;
+    const prevDisabled = page.number === 0 ? ' disabled' : '';
+    const nextDisabled = page.number >= page.totalPages-1 ? ' disabled' : '';
+
+    $p.append(`<li class="page-item${prevDisabled}"><a class="page-link" href="#" aria-label="Previous">&laquo;</a></li>`)
+      .find('li:first a').on('click', function(e){e.preventDefault(); if(page.number>0){ state.page = page.number-1; loadTasks(); }});
+
+    // show up to 7 pages window
+    const start = Math.max(0, page.number - 3);
+    const end = Math.min(page.totalPages - 1, page.number + 3);
+    for(let i=start;i<=end;i++){
+      const active = i===page.number ? ' active' : '';
+      const $li = $(`<li class="page-item${active}"><a class="page-link" href="#">${i+1}</a></li>`);
+      $li.on('click', function(e){e.preventDefault(); state.page = i; loadTasks();});
+      $p.append($li);
     }
 
-    function loadTasks() {
-      showSpinner(true);
-      $('#tasksTbody').html('<tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>');
-      $.ajax({
-        url: API_BASE,
-        method: 'GET',
-        headers: getAuthHeaders(),
-        success: function (data) {
-          renderRows(data || []);
-        },
-        error: handleAjaxError,
-        complete: function () { showSpinner(false); }
-      });
-    }
+    const $next = $(`<li class="page-item${nextDisabled}"><a class="page-link" href="#" aria-label="Next">&raquo;</a></li>`);
+    $next.on('click', function(e){e.preventDefault(); if(page.number<page.totalPages-1){ state.page = page.number+1; loadTasks(); }});
+    $p.append($next);
+  }
 
-    function renderRows(tasks) {
-      const $tbody = $('#tasksTbody');
-      $tbody.empty();
-      if (!tasks.length) {
-        $tbody.append('<tr><td colspan="6" class="text-center text-muted">No tasks found</td></tr>');
-        return;
-      }
-
-      tasks.forEach(t => {
-        const statusBadge = badgeForStatus(t.status);
-        const priorityBadge = badgeForPriority(t.priority);
-        const due = t.dueDate ? formatDate(t.dueDate) : '—';
-        const updated = t.updatedAt ? formatDateTime(t.updatedAt) : '—';
-
-        const $tr = $('<tr></tr>');
-        const $title = $('<td></td>');
-        $('<div class="font-weight-bold"></div>').text(t.title || '').appendTo($title);
-        if (t.description) $('<div class="small text-muted"></div>').text(t.description).appendTo($title);
-
-        $tr.append($title);
-        $tr.append(`<td class="d-none d-md-table-cell">${statusBadge}</td>`);
-        $tr.append(`<td class="d-none d-md-table-cell">${priorityBadge}</td>`);
-        $tr.append(`<td>${due}</td>`);
-        $tr.append(`<td class="d-none d-lg-table-cell">${updated}</td>`);
-        $tr.append(`
-          <td class="text-right">
-            <button class="btn btn-sm btn-outline-secondary mr-2" onclick='openEditModal(${JSON.stringify({id: t.id}).replace(/"/g, "&quot;")})'><i class="fas fa-pen"></i> Edit</button>
-            <button class="btn btn-sm btn-outline-danger" onclick='confirmDelete(${JSON.stringify({id: t.id, title: t.title}).replace(/"/g, "&quot;")})'><i class="fas fa-trash"></i> Delete</button>
-          </td>`);
-        $tbody.append($tr);
-      });
-
-    }
-
-
-    function openEditModal(payload) {
-      const id = payload.id;
-      if (!id) return;
-      showSpinner(true);
-      $.ajax({
-        url: API_BASE + '/' + id,
-        method: 'GET',
-        headers: getAuthHeaders(),
-        success: function (t) {
-          $('#edit-id').val(t.id);
-          $('#edit-title').val(t.title || '');
-          $('#edit-description').val(t.description || '');
-          $('#edit-status').val(t.status || 'TODO');
-          $('#edit-priority').val(t.priority || 'MEDIUM');
-          $('#edit-dueDate').val(t.dueDate ? (t.dueDate.substr(0,10)) : '');
-          $('#edit-createdAt').val(t.createdAt ? formatDateTime(t.createdAt) : '');
-          $('#edit-updatedAt').val(t.updatedAt ? formatDateTime(t.updatedAt) : '');
-          $('#editModal').modal('show');
-        },
-        error: handleAjaxError,
-        complete: function () { showSpinner(false); }
-      });
-    }
-
-    function onSaveEdit(e) {
-        e.preventDefault();
-        const id = $('#edit-id').val();
-        const body = {
-        title: ($('#edit-title').val() || '').trim(),
-        description: $('#edit-description').val() || '',
-        status: $('#edit-status').val() || 'TODO',
-        priority: $('#edit-priority').val() || 'MEDIUM',
-        dueDate: $('#edit-dueDate').val() || null
-        };
-
-
-        if (!body.title) {
-        swal({ text: 'Title is required', icon: 'warning', button: 'OK' });
-        return;
-    }
-
-
-    function resetCreateForm(){
-        $('#create-title').val('');
-        $('#create-description').val('');
-        $('#create-status').val('TODO');
-        $('#create-priority').val('MEDIUM');
-        $('#create-dueDate').val('');
-    }
-
-
+  function openEditModal(payload){
+    const id = payload.id; if(!id) return;
     showSpinner(true);
     $.ajax({
-        url: API_BASE + '/' + id,
-        method: 'PUT',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, getAuthHeaders()),
-        data: JSON.stringify(body),
-        success: function () {
-    $('#editModal').modal('hide');
-        swal({ text: 'Task updated', icon: 'success', button: 'OK' });
-        loadTasks();
-    },
-        error: handleAjaxError,
-        complete: function () { showSpinner(false); }
+      url: API_BASE + '/' + id,
+      method: 'GET',
+      headers: getAuthHeaders(),
+      success: function (t){
+        $('#edit-id').val(t.id);
+        $('#edit-title').val(t.title || '');
+        $('#edit-description').val(t.description || '');
+        $('#edit-note').val(t.note || '');
+        $('#edit-status').val(t.status || 'TODO');
+        $('#edit-priority').val(t.priority || 'MEDIUM');
+        $('#edit-dueDate').val(t.dueDate ? t.dueDate.substr(0,10) : '');
+        $('#edit-createdAt').val(t.createdAt ? formatDateTime(t.createdAt) : '');
+        $('#edit-updatedAt').val(t.updatedAt ? formatDateTime(t.updatedAt) : '');
+        $('#editModal').modal('show');
+      },
+      error: handleAjaxError,
+      complete: () => showSpinner(false)
     });
-    }
+  }
 
-
-    // === Create Task (global) ===
-    function onSaveCreate(e) {
-        e.preventDefault();
-        const body = {
-        title: ($('#create-title').val() || '').trim(),
-        description: $('#create-description').val() || '',
-        status: $('#create-status').val() || 'TODO',
-        priority: $('#create-priority').val() || 'MEDIUM',
-        dueDate: $('#create-dueDate').val() || null
+  function onSaveEdit(e){
+    e.preventDefault();
+    const id = $('#edit-id').val();
+    const body = {
+      title: ($('#edit-title').val() || '').trim(),
+      description: $('#edit-description').val() || '',
+      status: $('#edit-status').val() || 'TODO',
+      priority: $('#edit-priority').val() || 'MEDIUM',
+      dueDate: $('#edit-dueDate').val() || null,
+      note: $('#edit-note').val() || ''
     };
-    if (!body.title) {
-        swal({ text: 'Title is required', icon: 'warning', button: 'OK' });
-        return;
+    if (!body.title){
+      swal({ text:'Title is required', icon:'warning', button:'OK' }); return;
     }
-        showSpinner(true);
-        $.ajax({
-            url: API_BASE,
-            method: 'POST',
-            headers: Object.assign({ 'Content-Type': 'application/json' }, getAuthHeaders()),
-            data: JSON.stringify(body),
-            success: function () {
-    $('#createModal').modal('hide');
-        swal({ text: 'Task created', icon: 'success', button: 'OK' });
+    showSpinner(true);
+    $.ajax({
+      url: API_BASE + '/' + id,
+      method: 'PUT',
+      headers: Object.assign({'Content-Type':'application/json'}, getAuthHeaders()),
+      data: JSON.stringify(body),
+      success: function(){
+        $('#editModal').modal('hide');
+        swal({ text:'Task updated', icon:'success', button:'OK' });
         loadTasks();
-    },
-        error: handleAjaxError,
-        complete: function () { showSpinner(false); }
+      },
+      error: handleAjaxError,
+      complete: () => showSpinner(false)
     });
-    }
+  }
 
-
-    function resetCreateForm(){
-        $('#create-title').val('');
-        $('#create-description').val('');
-        $('#create-status').val('TODO');
-        $('#create-priority').val('MEDIUM');
-        $('#create-dueDate').val('');
+  function onSaveCreate(e){
+    e.preventDefault();
+    const body = {
+      title: ($('#create-title').val() || '').trim(),
+      description: $('#create-description').val() || '',
+      status: $('#create-status').val() || 'TODO',
+      priority: $('#create-priority').val() || 'MEDIUM',
+      dueDate: $('#create-dueDate').val() || null,
+      note: $('#create-note').val() || ''
+    };
+    if (!body.title){
+      swal({ text:'Title is required', icon:'warning', button:'OK' }); return;
     }
-    
-    function confirmDelete(payload) {
-      const id = payload.id; const title = payload.title || 'this task';
-      swal({
-        title: 'Delete task?',
-        text: 'Are you sure you want to delete "' + title + '"? This action cannot be undone.',
-        icon: 'warning',
-        buttons: [true, 'Delete'],
-        dangerMode: true,
-      }).then((willDelete) => {
-        if (willDelete) doDelete(id);
-      });
-    }
+    showSpinner(true);
+    $.ajax({
+      url: API_BASE,
+      method: 'POST',
+      headers: Object.assign({'Content-Type':'application/json'}, getAuthHeaders()),
+      data: JSON.stringify(body),
+      success: function(){
+        $('#createModal').modal('hide');
+        resetCreateForm();
+        swal({ text:'Task created', icon:'success', button:'OK' });
+        loadTasks();
+      },
+      error: handleAjaxError,
+      complete: () => showSpinner(false)
+    });
+  }
 
-    function doDelete(id) {
-      if (!id) return;
+  function resetCreateForm(){
+    $('#create-title').val('');
+    $('#create-description').val('');
+    $('#create-status').val('TODO');
+    $('#create-priority').val('MEDIUM');
+    $('#create-dueDate').val('');
+    $('#create-note').val('');
+  }
+
+  function confirmDelete(payload){
+    const id = payload.id; const title = payload.title || 'this task';
+    swal({
+      title:'Delete task?',
+      text:'Are you sure you want to delete "' + title + '"? This action cannot be undone.',
+      icon:'warning', buttons:[true,'Delete'], dangerMode:true
+    }).then(ok => { if(ok) doDelete(id); });
+  }
+
+  function doDelete(id){
+    if(!id) return;
+    showSpinner(true);
+    $.ajax({
+      url: API_BASE + '/' + id,
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      success: function(){
+        swal({ text:'Task deleted', icon:'success', button:'OK' });
+        loadTasks();
+      },
+      error: handleAjaxError,
+      complete: () => showSpinner(false)
+    });
+  }
+
+  function clearCompleted(){
+    swal({
+      title:'Clear completed?',
+      text:'This will remove all DONE tasks.',
+      icon:'warning', buttons:[true,'Clear'], dangerMode:true
+    }).then(ok => {
+      if(!ok) return;
       showSpinner(true);
       $.ajax({
-        url: API_BASE + '/' + id,
+        url: API_BASE + '/completed',
         method: 'DELETE',
         headers: getAuthHeaders(),
-        success: function () {
-          swal({ text: 'Task deleted', icon: 'success', button: 'OK' });
+        success: function(){
+          swal({ text:'Completed tasks cleared', icon:'success', button:'OK' });
           loadTasks();
         },
         error: handleAjaxError,
-        complete: function () { showSpinner(false); }
+        complete: () => showSpinner(false)
       });
-    }
+    });
+  }
 
-    function handleAjaxError(xhr) {
-      if (xhr && xhr.status === 401) {
-        swal({ text: 'Your session expired. Please login again.', icon: 'warning', button: 'Login' })
-          .then(() => { window.location.href = 'login.html'; });
-        return;
+  function logout(){
+    showSpinner(true);
+    $.ajax({
+      url: AUTH_BASE + '/logout',
+      method: 'POST',
+      headers: getAuthHeaders(),
+      complete: function(){ // regardless of server response, clear client
+        localStorage.removeItem('jwtToken');
+        // also clear cookies if you store tokens in cookies (cannot from JS if HttpOnly)
+        showSpinner(false);
+        window.location.href = 'login.html';
       }
-      try {
-        const message = (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) || xhr.responseText || 'Unknown error';
-        swal({ text: message, icon: 'error', button: 'OK' });
-      } catch (e) {
-        swal({ text: 'An error occurred. Please try again.', icon: 'error', button: 'OK' });
-      }
-    }
+    });
+  }
 
-    // UI helpers
-    function badgeForStatus(s) {
-      const map = {
-        'TODO': 'secondary',
-        'IN_PROGRESS': 'info',
-        'DONE': 'success'
-      };
-      const cls = map[s] || 'light';
-      return '<span class="badge badge-' + cls + '">' + (s || '') + '</span>';
+  function handleAjaxError(xhr){
+    if (xhr && xhr.status === 401){
+      swal({ text:'Your session expired. Please login again.', icon:'warning', button:'Login' })
+        .then(() => { window.location.href = 'login.html'; });
+      return;
     }
-    function badgeForPriority(p) {
-      const map = {
-        'LOW': 'success',
-        'MEDIUM': 'warning',
-        'HIGH': 'danger'
-      };
-      const cls = map[p] || 'light';
-      return '<span class="badge badge-' + cls + '">' + (p || '') + '</span>';
+    try{
+      const message = (xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.error)) || xhr.responseText || 'Unknown error';
+      swal({ text: message, icon:'error', button:'OK' });
+    }catch(e){
+      swal({ text:'An error occurred. Please try again.', icon:'error', button:'OK' });
     }
-    function pad(n) { return n < 10 ? '0' + n : '' + n; }
-    function formatDate(iso) {
-      try { const d = new Date(iso); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); } catch { return iso; }
-    }
-    function formatDateTime(iso) {
-      try { const d = new Date(iso); return d.toLocaleString(); } catch { return iso; }
-    }
-  </script>
+  }
+
+  // UI helpers
+  function badgeForStatus(s){
+    const map={ 'TODO':'secondary','IN_PROGRESS':'info','DONE':'success' };
+    const cls=map[s]||'light'; return '<span class="badge badge-'+cls+'">'+(s||'')+'</span>';
+  }
+  function badgeForPriority(p){
+    const map={ 'LOW':'success','MEDIUM':'warning','HIGH':'danger' };
+    const cls=map[p]||'light'; return '<span class="badge badge-'+cls+'">'+(p||'')+'</span>';
+  }
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function formatDate(iso){ try{ const d=new Date(iso); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }catch{ return iso; } }
+  function formatDateTime(iso){ try{ const d=new Date(iso); return d.toLocaleString(); }catch{ return iso; } }
+</script>
 </body>
-
 </html>
